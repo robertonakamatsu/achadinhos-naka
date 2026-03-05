@@ -3,18 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Achadinhos da Naka</title>
+    <title>AppWorker - Gerador de Ofertas</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px; background: #f4f4f4; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+        h1 { color: #1a73e8; font-size: 22px; text-align: center; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #444; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 15px; background: #1a73e8; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #1557b0; }
+        #resultado { margin-top: 20px; padding: 15px; background: #e8f0fe; border-radius: 8px; word-break: break-all; display: none; }
+        .copy-btn { background: #34a853; margin-top: 10px; font-size: 14px; padding: 10px; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>🛍️ Achadinhos da Naka</h1>
-        <p>O seu automatizador de ofertas está sendo configurado!</p>
-        <hr>
-        <p><em>Próximo passo: Integrar Amazon e Mercado Livre.</em></p>
+
+<div class="container">
+    <h1>🚀 AppWorker Ofertas</h1>
+    
+    <label for="linkOriginal">Link do Produto (Amazon, Shopee, Meli):</label>
+    <input type="text" id="linkOriginal" placeholder="Cole o link aqui...">
+
+    <button onclick="gerarLink()">Gerar Link de Afiliado</button>
+
+    <div id="resultado">
+        <label>Seu Link de Afiliado:</label>
+        <span id="linkGerado"></span>
+        <button class="copy-btn" onclick="copiarLink()">Copiar Link</button>
     </div>
+</div>
+
+<script>
+    const AMAZON_ID = 'achadin01d906-20';
+    const SHOPEE_ID = '18362810481';
+
+    function gerarLink() {
+        const urlOriginal = document.getElementById('linkOriginal').value;
+        let finalUrl = "";
+
+        if (urlOriginal.includes("amazon.com.br")) {
+            // Remove parâmetros antigos e adiciona o seu tag ID
+            const urlBase = urlOriginal.split('?')[0];
+            finalUrl = `${urlBase}?tag=${AMAZON_ID}`;
+        } 
+        else if (urlOriginal.includes("shopee.com.br")) {
+            // Estrutura básica para redirecionamento Shopee
+            finalUrl = `https://shope.ee/universal-link/custom?url=${encodeURIComponent(urlOriginal)}&utm_campaign=${SHOPEE_ID}`;
+        }
+        else if (urlOriginal.includes("mercadolivre.com.br") || urlOriginal.includes("mlstatic.com")) {
+            // No Mercado Livre, o ideal é usar o encurtador do painel, 
+            // mas aqui vamos apenas simular a organização por enquanto.
+            finalUrl = urlOriginal; 
+            alert("Atenção: Para o Mercado Livre, use o encurtador oficial no painel de afiliados para garantir a comissão!");
+        } else {
+            alert("Site não reconhecido. Cole um link da Amazon, Shopee ou Mercado Livre.");
+            return;
+        }
+
+        document.getElementById('linkGerado').innerText = finalUrl;
+        document.getElementById('resultado').style.display = 'block';
+    }
+
+    function copiarLink() {
+        const texto = document.getElementById('linkGerado').innerText;
+        navigator.clipboard.writeText(texto);
+        alert("Link copiado para a área de transferência!");
+    }
+</script>
+
 </body>
 </html>
