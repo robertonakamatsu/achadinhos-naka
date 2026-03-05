@@ -3,90 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AppWorker - Gerador de Stories</title>
+    <title>AppWorker - Gerador Pro</title>
     <style>
-        :root { --primary: #1a73e8; --shopee: #ee4d2d; --amazon: #ff9900; --meli: #fff159; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 450px; box-sizing: border-box; }
-        h1 { color: var(--primary); font-size: 24px; text-align: center; margin-top: 0; }
-        p { color: #666; font-size: 14px; text-align: center; }
+        :root { --primary: #1a73e8; --accent: #ff5722; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
-        input { width: 100%; padding: 15px; margin-bottom: 20px; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; font-size: 16px; transition: border 0.3s; }
-        input:focus { border-color: var(--primary); outline: none; }
+        .container { background: white; padding: 30px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); width: 100%; max-width: 480px; box-sizing: border-box; transition: all 0.3s ease; }
         
-        button { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-bottom: 10px; }
-        button:active { transform: scale(0.98); }
+        h1 { color: var(--primary); font-size: 28px; text-align: center; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        p.subtitle { color: #666; text-align: center; margin-bottom: 25px; font-size: 15px; }
 
-        #previewArea { display: none; margin-top: 30px; border: 2px dashed #ddd; padding: 15px; border-radius: 15px; background: #fafafa; }
-        #prodImg { width: 100%; max-width: 250px; border-radius: 10px; margin: 15px 0; background: #eee; }
-        #prodTitle { font-size: 16px; font-weight: 600; color: #222; margin: 0; }
+        .input-group { position: relative; margin-bottom: 20px; }
+        input { width: 100%; padding: 18px; border: 2px solid #edf0f2; border-radius: 16px; box-sizing: border-box; font-size: 16px; outline: none; transition: all 0.3s; background: #fdfdfd; }
+        input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1); }
+
+        button { width: 100%; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 16px; font-size: 17px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2); }
+        button:active { transform: scale(0.98); }
         
-        .btn-download { background: #34a853; margin-top: 15px; }
-        .loader { display: none; margin: 10px auto; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        /* Área de Preview Estilizada como Story */
+        #previewArea { display: none; margin-top: 30px; padding: 20px; border-radius: 20px; background: linear-gradient(145deg, #ffffff, #f0f0f0); border: 1px solid #eee; text-align: center; }
+        
+        .img-wrapper { background: white; border-radius: 12px; padding: 10px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        #prodImg { width: 100%; max-width: 280px; height: 280px; object-fit: contain; border-radius: 8px; }
+        
+        #prodTitle { font-size: 18px; font-weight: 700; color: #333; margin: 10px 0; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        #prodPrice { color: #2e7d32; font-size: 26px; font-weight: 900; margin: 10px 0; }
+
+        .loader { display: none; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .btn-download { background: var(--accent); margin-top: 20px; box-shadow: 0 4px 12px rgba(255, 87, 34, 0.2); }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>🚀 AppWorker</h1>
-    <p>Cole seu link de afiliado da <strong>Amazon, Shopee ou Mercado Livre</strong> para gerar o Story.</p>
+    <p class="subtitle">Cole seu link de afiliado da <strong>Amazon, Shopee ou Meli</strong></p>
     
-    <label for="linkAfiliado">Link de Afiliado:</label>
-    <input type="text" id="linkAfiliado" placeholder="https://shope.ee/... ou https://amzn.to/..." onpaste="setTimeout(puxarDados, 100)">
+    <div class="input-group">
+        <input type="text" id="linkInput" placeholder="Cole o link aqui..." onpaste="setTimeout(processarLink, 100)">
+    </div>
 
     <div id="loader" class="loader"></div>
-    <button id="btnPuxar" onclick="puxarDados()">Capturar Dados do Produto</button>
 
     <div id="previewArea">
-        <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #999;">Prévia da Imagem</p>
-        <h3 id="prodTitle">Carregando título...</h3>
-        <img id="prodImg" src="" alt="Produto">
-        <p id="prodPrice" style="color: #2e7d32; font-size: 22px; font-weight: 800; margin: 10px 0;"></p>
+        <div class="img-wrapper">
+            <img id="prodImg" src="" alt="Produto">
+        </div>
+        <h3 id="prodTitle">Título do Produto</h3>
+        <p id="prodPrice">R$ 0,00</p>
         
-        <button class="btn-download" onclick="alert('Funcionalidade de gerar imagem JPG em desenvolvimento!')">Baixar Arte para Story</button>
+        <button class="btn-download" onclick="alert('Gerando arquivo JPG...')">Baixar Arte para Story</button>
     </div>
 </div>
 
 <script>
-    async function puxarDados() {
-        const url = document.getElementById('linkAfiliado').value;
-        if(!url) return;
+    async function processarLink() {
+        const url = document.getElementById('linkInput').value;
+        if (!url) return;
 
-        const btn = document.getElementById('btnPuxar');
         const loader = document.getElementById('loader');
         const preview = document.getElementById('previewArea');
-
-        btn.style.display = 'none';
+        
         loader.style.display = 'block';
         preview.style.display = 'none';
 
         try {
-            // Usando Microlink para extrair meta-tags (OpenGraph)
-            // Isso funciona para links curtos da Shopee, Amazon e Meli
-            const response = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}&palette=true`);
+            // Microlink com proxy de imagem para evitar erros de carregamento
+            const api = `https://api.microlink.io?url=${encodeURIComponent(url)}&screenshot=true&embed=screenshot.url`;
+            const response = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
             const result = await response.json();
 
             if (result.status === 'success') {
                 const data = result.data;
                 
-                document.getElementById('prodTitle').innerText = data.title || "Oferta Especial";
-                document.getElementById('prodImg').src = data.image?.url || data.logo?.url || "";
+                // Título limpo
+                document.getElementById('prodTitle').innerText = data.title;
                 
-                // Tenta extrair preço se disponível, senão deixa vazio para você preencher no Story
-                document.getElementById('prodPrice').innerText = data.description?.match(/R\$\s?(\d+,\d{2})/)?.[0] || "🔥 Confira o Preço!";
+                // Imagem com fallback caso falhe
+                const imgUrl = data.image?.url || data.logo?.url;
+                // Usamos o wsrv.nl como proxy para "quebrar" o bloqueio de imagem dos sites
+                document.getElementById('prodImg').src = imgUrl ? `https://images.weserv.nl/?url=${encodeURIComponent(imgUrl)}` : '';
+                
+                // Tenta buscar preço na descrição ou meta-tags
+                const priceMatch = data.description?.match(/R\$\s?(\d+,\d{2})/);
+                document.getElementById('prodPrice').innerText = priceMatch ? priceMatch[0] : "🔥 Confira no Link!";
                 
                 preview.style.display = 'block';
             } else {
-                alert("Não conseguimos ler este link automaticamente. Tente copiar o link completo do produto.");
+                alert("Não conseguimos capturar os dados. O link é de afiliado válido?");
             }
         } catch (error) {
-            console.error(error);
-            alert("Erro na conexão. Verifique o link e tente novamente.");
+            alert("Erro ao processar. Tente novamente.");
         } finally {
             loader.style.display = 'none';
-            btn.style.display = 'block';
         }
     }
 </script>
