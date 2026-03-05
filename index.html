@@ -5,34 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AppWorker - Gerador Pro</title>
     <style>
-        :root { --primary: #1a73e8; --accent: #ff5722; --bg: #f8f9fa; }
+        :root { --primary: #1a73e8; --accent: #34a853; --bg: #f8f9fa; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
-        .container { background: white; padding: 30px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); width: 100%; max-width: 480px; box-sizing: border-box; transition: all 0.3s ease; }
+        .container { background: white; padding: 30px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); width: 100%; max-width: 480px; box-sizing: border-box; }
         
         h1 { color: var(--primary); font-size: 28px; text-align: center; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; }
         p.subtitle { color: #666; text-align: center; margin-bottom: 25px; font-size: 15px; }
 
-        .input-group { position: relative; margin-bottom: 20px; }
-        input { width: 100%; padding: 18px; border: 2px solid #edf0f2; border-radius: 16px; box-sizing: border-box; font-size: 16px; outline: none; transition: all 0.3s; background: #fdfdfd; }
+        input { width: 100%; padding: 18px; border: 2px solid #edf0f2; border-radius: 16px; box-sizing: border-box; font-size: 16px; outline: none; transition: 0.3s; background: #fdfdfd; margin-bottom: 15px; }
         input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1); }
 
-        button { width: 100%; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 16px; font-size: 17px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2); }
+        button { width: 100%; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 16px; font-size: 17px; font-weight: 600; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2); }
         button:active { transform: scale(0.98); }
         
-        /* Área de Preview Estilizada como Story */
-        #previewArea { display: none; margin-top: 30px; padding: 20px; border-radius: 20px; background: linear-gradient(145deg, #ffffff, #f0f0f0); border: 1px solid #eee; text-align: center; }
+        #previewArea { display: none; margin-top: 30px; padding: 20px; border-radius: 20px; background: #fff; border: 1px solid #eee; text-align: center; }
         
-        .img-wrapper { background: white; border-radius: 12px; padding: 10px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .img-wrapper { background: white; border-radius: 12px; padding: 10px; margin-bottom: 15px; border: 1px solid #f0f0f0; }
         #prodImg { width: 100%; max-width: 280px; height: 280px; object-fit: contain; border-radius: 8px; }
         
-        #prodTitle { font-size: 18px; font-weight: 700; color: #333; margin: 10px 0; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        #prodPrice { color: #2e7d32; font-size: 26px; font-weight: 900; margin: 10px 0; }
+        #prodTitle { font-size: 18px; font-weight: 700; color: #333; margin: 10px 0; line-height: 1.4; }
+        #prodPrice { color: var(--accent); font-size: 26px; font-weight: 900; margin: 10px 0; }
 
         .loader { display: none; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        .btn-download { background: var(--accent); margin-top: 20px; box-shadow: 0 4px 12px rgba(255, 87, 34, 0.2); }
+        .btn-download { background: var(--accent); margin-top: 20px; box-shadow: 0 4px 12px rgba(52, 168, 83, 0.2); }
     </style>
 </head>
 <body>
@@ -41,9 +39,8 @@
     <h1>🚀 AppWorker</h1>
     <p class="subtitle">Cole seu link de afiliado da <strong>Amazon, Shopee ou Meli</strong></p>
     
-    <div class="input-group">
-        <input type="text" id="linkInput" placeholder="Cole o link aqui..." onpaste="setTimeout(processarLink, 100)">
-    </div>
+    <input type="text" id="linkInput" placeholder="Cole o link aqui..." onpaste="setTimeout(processarLink, 100)">
+    <button id="btnManual" onclick="processarLink()">Capturar Dados</button>
 
     <div id="loader" class="loader"></div>
 
@@ -52,9 +49,9 @@
             <img id="prodImg" src="" alt="Produto">
         </div>
         <h3 id="prodTitle">Título do Produto</h3>
-        <p id="prodPrice">R$ 0,00</p>
+        <p id="prodPrice">🔥 Confira o Preço!</p>
         
-        <button class="btn-download" onclick="alert('Gerando arquivo JPG...')">Baixar Arte para Story</button>
+        <button class="btn-download" onclick="alert('Funcionalidade de Download em breve!')">Baixar Arte para Story</button>
     </div>
 </div>
 
@@ -65,39 +62,41 @@
 
         const loader = document.getElementById('loader');
         const preview = document.getElementById('previewArea');
+        const btnManual = document.getElementById('btnManual');
         
         loader.style.display = 'block';
+        btnManual.style.display = 'none';
         preview.style.display = 'none';
 
         try {
-            // Microlink com proxy de imagem para evitar erros de carregamento
-            const api = `https://api.microlink.io?url=${encodeURIComponent(url)}&screenshot=true&embed=screenshot.url`;
-            const response = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
+            // Utilizamos o Microlink que é excelente para extrair meta-tags de e-commerce
+            const response = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}&palette=true`);
             const result = await response.json();
 
             if (result.status === 'success') {
                 const data = result.data;
                 
-                // Título limpo
-                document.getElementById('prodTitle').innerText = data.title;
+                document.getElementById('prodTitle').innerText = data.title || "Oferta Especial";
                 
-                // Imagem com fallback caso falhe
-                const imgUrl = data.image?.url || data.logo?.url;
-                // Usamos o wsrv.nl como proxy para "quebrar" o bloqueio de imagem dos sites
-                document.getElementById('prodImg').src = imgUrl ? `https://images.weserv.nl/?url=${encodeURIComponent(imgUrl)}` : '';
-                
-                // Tenta buscar preço na descrição ou meta-tags
+                // O segredo está aqui: usamos o proxy wsrv.nl para carregar a imagem sem bloqueios de CORS
+                const rawImg = data.image?.url || data.logo?.url || "";
+                if (rawImg) {
+                    document.getElementById('prodImg').src = `https://images.weserv.nl/?url=${encodeURIComponent(rawImg)}&w=500&fit=contain`;
+                }
+
+                // Tenta buscar preço na descrição
                 const priceMatch = data.description?.match(/R\$\s?(\d+,\d{2})/);
                 document.getElementById('prodPrice').innerText = priceMatch ? priceMatch[0] : "🔥 Confira no Link!";
                 
                 preview.style.display = 'block';
             } else {
-                alert("Não conseguimos capturar os dados. O link é de afiliado válido?");
+                alert("Não conseguimos capturar os dados. O link é válido?");
             }
         } catch (error) {
-            alert("Erro ao processar. Tente novamente.");
+            alert("Erro ao processar. Tente copiar o link novamente.");
         } finally {
             loader.style.display = 'none';
+            btnManual.style.display = 'block';
         }
     }
 </script>
