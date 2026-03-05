@@ -14,32 +14,30 @@
         label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; text-align: left; color: #444; }
         input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; font-size: 15px; }
         
-        /* Seleção de Loja */
         .store-selector { display: flex; gap: 8px; margin-bottom: 15px; }
-        .store-btn { flex: 1; padding: 10px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; text-align: center; font-weight: bold; font-size: 12px; transition: 0.3s; }
-        .store-btn.active { border-color: #333; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
+        .store-btn { flex: 1; padding: 10px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; text-align: center; font-weight: bold; font-size: 11px; transition: 0.3s; }
+        .store-btn.active { border-color: #333; transform: scale(1.05); }
         .store-shopee { background: var(--shopee); color: white; }
         .store-meli { background: var(--meli); color: black; }
         .store-amazon { background: var(--amazon); color: white; }
 
         .upload-area { border: 2px dashed #bbb; padding: 15px; border-radius: 10px; cursor: pointer; margin-bottom: 15px; text-align: center; background: #fafafa; }
 
-        /* --- Design do Story --- */
         #storyArea { background: white; width: 100%; border-radius: 15px; border: 1px solid #eee; margin-top: 20px; display: none; text-align: center; overflow: hidden; }
-        #canvasFrame { padding: 40px 30px; position: relative; min-height: 500px; display: flex; flex-direction: column; justify-content: center; }
+        #canvasFrame { padding: 40px 30px; position: relative; min-height: 450px; display: flex; flex-direction: column; justify-content: center; transition: background 0.3s ease; }
         
-        .img-container { background: #fff; width: 100%; height: 320px; border-radius: 15px; padding: 10px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .img-container { background: #fff; width: 100%; height: 300px; border-radius: 15px; padding: 10px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         #prodImgPreview { max-width: 100%; max-height: 100%; object-fit: contain; }
         
-        .title-display { font-size: 20px; font-weight: 800; color: #333; margin: 10px 0; line-height: 1.2; text-shadow: 0 1px 2px rgba(255,255,255,0.5); }
-        .price-display { font-size: 38px; font-weight: 900; color: #2e7d32; margin: 10px 0; text-shadow: 0 1px 2px rgba(255,255,255,0.5); }
+        .title-display { font-size: 20px; font-weight: 800; color: #333; margin: 10px 0; line-height: 1.2; }
+        .price-display { font-size: 38px; font-weight: 900; margin: 10px 0; }
         
-        .logos-area { display: flex; justify-content: space-between; align-items: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(0,0,0,0.05); }
-        .store-logo { height: 25px; max-width: 110px; object-fit: contain; }
+        .logos-area { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid rgba(0,0,0,0.1); }
+        .store-logo { height: 25px; max-width: 100px; object-fit: contain; }
         .naka-logo { height: 40px; border-radius: 50%; border: 2px solid white; background: white; }
 
-        button { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 17px; font-weight: bold; cursor: pointer; }
-        .btn-download { background: #34a853; margin-top: 15px; }
+        button.main-btn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 17px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-download { background: #34a853 !important; }
     </style>
 </head>
 <body>
@@ -50,7 +48,7 @@
     <label>1. Escolha a Loja</label>
     <div class="store-selector">
         <div id="btnShopee" class="store-btn store-shopee active" onclick="selecionarLoja('shopee')">Shopee</div>
-        <div id="btnMeli" class="store-btn store-meli" onclick="selecionarLoja('meli')">Mercado Livre</div>
+        <div id="btnMeli" class="store-btn store-meli" onclick="selecionarLoja('meli')">Meli</div>
         <div id="btnAmazon" class="store-btn store-amazon" onclick="selecionarLoja('amazon')">Amazon</div>
     </div>
 
@@ -63,4 +61,99 @@
     <label>3. Título da Oferta</label>
     <input type="text" id="inTitle" placeholder="Ex: iPhone 15 Pro Max" oninput="updatePreview()">
 
-    <label>4. Preço (Opcional)</
+    <label>4. Preço (Opcional)</label>
+    <input type="text" id="inPrice" placeholder="Ex: 5.499,00" oninput="updatePreview()">
+
+    <label>5. Link de Afiliado</label>
+    <input type="text" id="inLink" placeholder="Cole o link aqui...">
+
+    <div id="storyArea">
+        <div id="canvasFrame" style="background: var(--shopee);">
+            <div class="img-container">
+                <img id="prodImgPreview" src="" alt="">
+            </div>
+            <div id="outTitle" class="title-display">Título do Produto</div>
+            <div id="outPrice" class="price-display"></div>
+            
+            <div class="logos-area">
+                <img id="outLogoLoja" class="store-logo" src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg" alt="">
+                <img class="naka-logo" src="https://via.placeholder.com/150?text=NAKA" alt="">
+            </div>
+        </div>
+        
+        <button class="main-btn" style="background: #333;" onclick="copiarLink()">Copiar Link</button>
+        <button class="main-btn btn-download" onclick="baixar()">Baixar Arte (Story)</button>
+    </div>
+</div>
+
+<script>
+    function selecionarLoja(loja) {
+        document.querySelectorAll('.store-btn').forEach(b => b.classList.remove('active'));
+        const frame = document.getElementById('canvasFrame');
+        const logoLoja = document.getElementById('outLogoLoja');
+        const priceText = document.getElementById('outPrice');
+
+        if(loja === 'shopee') {
+            document.getElementById('btnShopee').classList.add('active');
+            frame.style.background = 'var(--shopee)';
+            logoLoja.src = 'https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg';
+            logoLoja.style.filter = 'none';
+            priceText.style.color = '#2e7d32';
+        } else if(loja === 'meli') {
+            document.getElementById('btnMeli').classList.add('active');
+            frame.style.background = 'var(--meli)';
+            logoLoja.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Mercado_Libre_logo.svg/2000px-Mercado_Libre_logo.svg.png';
+            logoLoja.style.filter = 'none';
+            priceText.style.color = '#222';
+        } else if(loja === 'amazon') {
+            document.getElementById('btnAmazon').classList.add('active');
+            frame.style.background = 'var(--amazon)';
+            logoLoja.src = 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg';
+            logoLoja.style.filter = 'brightness(0) invert(1)';
+            priceText.style.color = '#ff9900';
+        }
+    }
+
+    function handleImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('prodImgPreview').src = e.target.result;
+                document.getElementById('uploadText').innerText = "Imagem carregada!";
+                document.getElementById('storyArea').style.display = 'block';
+                updatePreview();
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function updatePreview() {
+        const title = document.getElementById('inTitle').value;
+        const price = document.getElementById('inPrice').value;
+        const priceDisplay = document.getElementById('outPrice');
+
+        document.getElementById('outTitle').innerText = title || "Oferta Especial";
+        
+        if(!price || price.trim() === "") {
+            priceDisplay.style.display = 'none';
+        } else {
+            priceDisplay.style.display = 'block';
+            priceDisplay.innerText = `R$ ${price}`;
+        }
+    }
+
+    function copiarLink() {
+        const texto = document.getElementById('inLink').value;
+        if(texto) {
+            navigator.clipboard.writeText(texto).then(() => alert("Link copiado!"));
+        } else {
+            alert("Cole o link primeiro.");
+        }
+    }
+
+    function baixar() {
+        const area = document.getElementById('canvasFrame');
+        html2canvas(area, { scale: 2, useCORS: true }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `oferta-${Date.now()}.png`;
+            link.href = canvas.
