@@ -3,45 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AppWorker Pro</title>
+    <title>AppWorker Pro - Gerador de Stories</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         :root { --primary: #1a73e8; --accent: #34a853; --bg: #f8f9fa; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .container { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); width: 100%; max-width: 450px; text-align: center; }
         input { width: 100%; padding: 15px; border: 2px solid #edf0f2; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        button { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
         
-        /* Estilo do Story para o Download */
-        #storyArea { display: none; margin-top: 20px; padding: 20px; background: white; border: 1px solid #eee; border-radius: 15px; position: relative; }
-        .img-box { background: #fff; padding: 10px; border: 1px solid #f0f0f0; border-radius: 12px; margin-bottom: 15px; }
-        #prodImg { max-width: 100%; height: 250px; object-fit: contain; }
-        #prodTitle { font-size: 16px; font-weight: 700; color: #333; margin: 10px 0; }
-        #prodPrice { color: var(--accent); font-size: 24px; font-weight: 900; }
-        
+        #storyArea { display: none; margin-top: 20px; padding: 15px; background: white; border-radius: 15px; border: 1px solid #eee; }
+        .canvas-box { background: white; padding: 20px; border-radius: 10px; }
+        #prodImg { max-width: 100%; height: 250px; object-fit: contain; margin-bottom: 15px; }
+        #prodTitle { font-size: 18px; font-weight: 700; color: #333; margin: 10px 0; line-height: 1.3; }
+        #prodPrice { color: var(--accent); font-size: 28px; font-weight: 900; margin: 10px 0; }
+
+        /* Seletor de Imagens caso venha o logo */
+        .image-picker { display: flex; overflow-x: auto; gap: 10px; margin: 15px 0; padding: 10px; background: #fdfdfd; border-radius: 10px; border: 1px dashed #ccc; }
+        .image-picker img { height: 80px; width: 80px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid transparent; }
+        .image-picker img:hover { border-color: var(--primary); }
+
         .loader { display: none; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 15px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .btn-save { background: var(--accent); margin-top: 15px; }
+        .btn-save { background: var(--accent); width: 100%; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>🚀 AppWorker</h1>
-    <input type="text" id="linkInput" placeholder="Cole o link de afiliado aqui...">
-    <button onclick="processar()">Gerar Story</button>
+    <p style="color: #666; font-size: 14px;">Cole o link e escolha a imagem do produto abaixo</p>
+    <input type="text" id="linkInput" placeholder="Cole o link de afiliado aqui..." onpaste="setTimeout(processar, 100)">
+    <button onclick="processar()">Capturar Dados</button>
+    
     <div id="loader" class="loader"></div>
 
     <div id="storyArea">
-        <div id="captureArea" style="padding: 10px; background: white;">
-            <div class="img-box">
-                <img id="prodImg" crossorigin="anonymous" src="" alt="Produto">
-            </div>
-            <h3 id="prodTitle">Título do Produto</h3>
-            <p id="prodPrice">Confira no Link!</p>
-            <p style="font-size: 10px; color: #999;">appworker.com.br</p>
+        <p style="font-size: 12px; color: #999;">Se a imagem estiver errada, clique em outra:</p>
+        <div id="imagePicker" class="image-picker"></div>
+
+        <div id="captureArea" class="canvas-box">
+            <img id="prodImg" crossorigin="anonymous" src="" alt="Produto">
+            <h3 id="prodTitle">Carregando...</h3>
+            <p id="prodPrice">R$ --,--</p>
+            <p style="font-size: 12px; color: #aaa; margin-top: 20px;">@appworker.com.br</p>
         </div>
-        <button class="btn-save" onclick="baixar()">Baixar Imagem</button>
+        
+        <button class="btn-save" onclick="baixar()">Baixar Imagem para Story</button>
     </div>
 </div>
 
@@ -49,32 +57,69 @@
     async function processar() {
         const url = document.getElementById('linkInput').value;
         if (!url) return;
-        document.getElementById('loader').style.display = 'block';
-        document.getElementById('storyArea').style.display = 'none';
+        
+        const loader = document.getElementById('loader');
+        const storyArea = document.getElementById('storyArea');
+        const picker = document.getElementById('imagePicker');
+        
+        loader.style.display = 'block';
+        storyArea.style.display = 'none';
+        picker.innerHTML = '';
 
         try {
-            const res = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
+            // Microlink configurado para trazer múltiplas imagens
+            const res = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}&palette=true`);
             const json = await res.json();
+            
             if (json.status === 'success') {
                 const d = json.data;
                 document.getElementById('prodTitle').innerText = d.title;
                 
-                // Forçamos o carregamento da imagem via proxy para evitar o bloqueio de CORS visto nas imagens anteriores
-                let imgUrl = d.image?.url || d.logo?.url;
-                document.getElementById('prodImg').src = `https://images.weserv.nl/?url=${encodeURIComponent(imgUrl)}&w=500`;
+                // Pegamos a imagem principal e tentamos buscar outras imagens secundárias
+                let mainImg = d.image?.url || d.logo?.url;
+                let imagesFound = [mainImg];
                 
-                document.getElementById('storyArea').style.display = 'block';
+                // Se houver screenshots ou outras imagens no metadata, adicionamos ao seletor
+                if(d.screenshot?.url) imagesFound.push(d.screenshot.url);
+
+                // Mostra as opções de imagem para você escolher a certa
+                imagesFound.forEach(imgUrl => {
+                    const imgThumb = document.createElement('img');
+                    // Usamos o proxy weserv para garantir que o thumbnail carregue
+                    const proxiedUrl = `https://images.weserv.nl/?url=${encodeURIComponent(imgUrl)}&w=100`;
+                    imgThumb.src = proxiedUrl;
+                    imgThumb.onclick = () => {
+                        document.getElementById('prodImg').src = `https://images.weserv.nl/?url=${encodeURIComponent(imgUrl)}&w=600`;
+                    };
+                    picker.appendChild(imgThumb);
+                });
+
+                // Define a imagem inicial
+                document.getElementById('prodImg').src = `https://images.weserv.nl/?url=${encodeURIComponent(mainImg)}&w=600`;
+                
+                // Tenta pegar o preço
+                const priceMatch = d.description?.match(/R\$\s?(\d+,\d{2})/);
+                document.getElementById('prodPrice').innerText = priceMatch ? priceMatch[0] : "Confira o Preço!";
+                
+                storyArea.style.display = 'block';
             }
-        } catch (e) { alert("Erro ao capturar dados."); }
-        finally { document.getElementById('loader').style.display = 'none'; }
+        } catch (e) { 
+            alert("Erro ao capturar dados. Verifique se o link está correto."); 
+        } finally { 
+            loader.style.display = 'none'; 
+        }
     }
 
     function baixar() {
         const area = document.getElementById('captureArea');
-        html2canvas(area, { useCORS: true, logging: false }).then(canvas => {
+        html2canvas(area, { 
+            useCORS: true, 
+            backgroundColor: "#ffffff",
+            scale: 2 // Melhora a qualidade da imagem
+        }).then(canvas => {
             const link = document.createElement('a');
-            link.download = 'story-oferta.png';
-            link.href = canvas.toDataURL();
+            link.download = 'oferta-appworker.png';
+            link.href = canvas.toDataURL("image/png");
             link.click();
         });
     }
