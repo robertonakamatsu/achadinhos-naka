@@ -3,29 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AppWorker - Estúdio de Ofertas</title>
+    <title>AppWorker - Estúdio Achadinhos</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
-        :root { --primary: #1a73e8; --accent: #34a853; --bg: #f8f9fa; }
+        :root { --primary: #1a73e8; --bg: #f8f9fa; --shopee: #ee4d2d; --meli: #fff159; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
-        .container { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); width: 100%; max-width: 400px; box-sizing: border-box; }
-        h1 { color: var(--primary); font-size: 22px; margin-bottom: 20px; text-align: center; }
+        .container { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); width: 100%; max-width: 420px; box-sizing: border-box; }
+        h1 { color: var(--primary); font-size: 22px; text-align: center; margin-bottom: 20px; }
         
-        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; color: #444; text-align: left; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; text-align: left; color: #444; }
         input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; font-size: 15px; }
         
-        .upload-area { border: 2px dashed #bbb; padding: 20px; border-radius: 10px; cursor: pointer; margin-bottom: 15px; background: #fafafa; }
+        /* Seleção de Loja */
+        .store-selector { display: flex; gap: 10px; margin-bottom: 15px; }
+        .store-btn { flex: 1; padding: 10px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; text-align: center; font-weight: bold; font-size: 14px; transition: 0.3s; }
+        .store-btn.active { border-color: #333; }
+        .store-shopee { background: var(--shopee); color: white; }
+        .store-meli { background: var(--meli); color: black; }
+
+        .upload-area { border: 2px dashed #bbb; padding: 15px; border-radius: 10px; cursor: pointer; margin-bottom: 15px; text-align: center; }
         .upload-area:hover { border-color: var(--primary); }
 
-        /* Estética do Story */
-        #captureArea { background: white; width: 100%; padding: 20px; border-radius: 15px; border: 1px solid #eee; margin-top: 20px; display: none; text-align: center; }
-        #prodImgPreview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; margin-bottom: 15px; }
-        .title-display { font-size: 18px; font-weight: 700; color: #222; margin: 10px 0; line-height: 1.3; }
-        .price-display { font-size: 32px; font-weight: 900; color: var(--accent); margin: 10px 0; }
-        .footer-tag { font-size: 12px; color: #bbb; margin-top: 15px; }
+        /* --- Design do Story (Área de Captura) --- */
+        #storyArea { background: white; width: 100%; border-radius: 15px; border: 1px solid #eee; margin-top: 20px; display: none; text-align: center; position: relative; overflow: hidden; }
+        #canvasFrame { padding: 30px; position: relative; transition: background 0.5s; } /* Fundo que muda de cor */
+        
+        /* Redimensionamento Inteligente: Contain garante imagem perfeita, sem esticar */
+        .img-container { background: #fff; width: 100%; height: 300px; border-radius: 10px; padding: 10px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+        #prodImgPreview { max-width: 100%; max-height: 100%; object-fit: contain; } /* CORREÇÃO DE REDIMENSIONAMENTO */
+        
+        .title-display { font-size: 18px; font-weight: 700; color: #333; margin: 10px 0; line-height: 1.3; }
+        .price-display { font-size: 34px; font-weight: 900; color: #2e7d32; margin: 10px 0; }
+        .logos-area { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; }
+        .store-logo { height: 30px; max-width: 100px; object-fit: contain; }
+        .naka-logo { height: 35px; border-radius: 50%; border: 2px solid #333; }
 
-        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .btn-download { background: var(--accent); margin-top: 15px; }
+        button { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 17px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-download { background: #34a853; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -33,37 +47,74 @@
 <div class="container">
     <h1>🚀 AppWorker Estúdio</h1>
     
-    <label>1. Foto do Produto (Print ou Foto)</label>
+    <label>1. Escolha a Loja (Fundo/Logo)</label>
+    <div class="store-selector">
+        <div id="btnShopee" class="store-btn store-shopee active" onclick="selecionarLoja('shopee')">Shopee</div>
+        <div id="btnMeli" class="store-btn store-meli" onclick="selecionarLoja('meli')">Meli</div>
+    </div>
+
+    <label>2. Foto do Produto (Print ou Imagem)</label>
     <div class="upload-area" onclick="document.getElementById('fileInput').click()">
         <span id="uploadText">Clique para subir a imagem</span>
         <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleImage(this)">
     </div>
 
-    <label>2. Título Curto</label>
+    <label>3. Título Curto</label>
     <input type="text" id="inTitle" placeholder="Ex: Smart TV 50 Polegadas" oninput="updatePreview()">
 
-    <label>3. Preço (R$)</label>
+    <label>4. Preço (R$)</label>
     <input type="text" id="inPrice" placeholder="Ex: 1.999,00" oninput="updatePreview()">
 
-    <div id="captureArea">
-        <img id="prodImgPreview" src="" alt="">
-        <div id="outTitle" class="title-display">Título do Produto</div>
-        <div id="outPrice" class="price-display">R$ 0,00</div>
-        <div class="footer-tag">appworker.com.br</div>
-    </div>
+    <label>5. Cole seu Link de Afiliado (Para copiar)</label>
+    <input type="text" id="inLink" placeholder="https://shope.ee/... ou https://mercadolivre.com/...">
 
-    <button id="btnDownload" class="btn-download" style="display:none" onclick="baixar()">Baixar Story Pronto</button>
+    <div id="storyArea">
+        <div id="canvasFrame" style="background: var(--shopee);">
+            <div class="img-container">
+                <img id="prodImgPreview" crossorigin="anonymous" src="" alt="Produto">
+            </div>
+            <div id="outTitle" class="title-display">Título do Produto</div>
+            <div id="outPrice" class="price-display">R$ 0,00</div>
+            
+            <div class="logos-area">
+                <img id="outLogoLoja" class="store-logo" src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg" alt="Logo Loja">
+                <img class="naka-logo" src="https://via.placeholder.com/150" alt="Logo Achadinhos Naka"> </div>
+        </div>
+        
+        <button id="btnCopyLink" style="background: #333; margin-top: 10px;" onclick="copiarLink()">Copiar Link para o Story</button>
+        <button id="btnDownload" class="btn-download" onclick="baixar()">Baixar Arte (JPG)</button>
+    </div>
 </div>
 
 <script>
+    let lojaAtiva = 'shopee';
+
+    function selecionarLoja(loja) {
+        lojaAtiva = loja;
+        document.getElementById('btnShopee').classList.remove('active');
+        document.getElementById('btnMeli').classList.remove('active');
+        const frame = document.getElementById('canvasFrame');
+        const logoLoja = document.getElementById('outLogoLoja');
+
+        if(loja === 'shopee') {
+            document.getElementById('btnShopee').classList.add('active');
+            frame.style.background = 'var(--shopee)';
+            logoLoja.src = 'https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg';
+        } else {
+            document.getElementById('btnMeli').classList.add('active');
+            frame.style.background = 'var(--meli)';
+            logoLoja.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Mercado_Libre_logo.svg/2000px-Mercado_Libre_logo.svg.png';
+        }
+    }
+
     function handleImage(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                document.getElementById('prodImgPreview').src = e.target.result;
+                const img = document.getElementById('prodImgPreview');
+                img.src = e.target.result;
                 document.getElementById('uploadText').innerText = "Imagem carregada!";
-                document.getElementById('captureArea').style.display = 'block';
-                document.getElementById('btnDownload').style.display = 'block';
+                document.getElementById('storyArea').style.display = 'block';
             }
             reader.readAsDataURL(input.files[0]);
         }
@@ -72,20 +123,29 @@
     function updatePreview() {
         const title = document.getElementById('inTitle').value;
         const price = document.getElementById('inPrice').value;
-        
         document.getElementById('outTitle').innerText = title || "Título do Produto";
         document.getElementById('outPrice').innerText = price ? `R$ ${price}` : "R$ 0,00";
     }
 
+    function copiarLink() {
+        const texto = document.getElementById('inLink').value;
+        if(texto) {
+            navigator.clipboard.writeText(texto);
+            alert("Link copiado! No Story, use o adesivo de 'Link' e cole.");
+        } else {
+            alert("Cole o link de afiliado primeiro.");
+        }
+    }
+
     function baixar() {
-        const area = document.getElementById('captureArea');
+        const area = document.getElementById('canvasFrame');
         html2canvas(area, { 
-            backgroundColor: "#ffffff",
-            scale: 2 
+            scale: 2, // Aumenta a qualidade para o Instagram
+            useCORS: true // Essencial se houver imagens externas
         }).then(canvas => {
             const link = document.createElement('a');
-            link.download = `oferta-${Date.now()}.png`;
-            link.href = canvas.toDataURL();
+            link.download = `achadinhos-${Date.now()}.jpg`;
+            link.href = canvas.toDataURL("image/jpeg");
             link.click();
         });
     }
