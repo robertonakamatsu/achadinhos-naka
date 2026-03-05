@@ -37,26 +37,29 @@
     const AMAZON_ID = 'achadin01d906-20';
     const SHOPEE_ID = '18362810481';
 
-    function gerarLink() {
+function gerarLink() {
         const urlOriginal = document.getElementById('linkOriginal').value;
         let finalUrl = "";
 
         if (urlOriginal.includes("amazon.com.br")) {
-            // Remove parâmetros antigos e adiciona o seu tag ID
             const urlBase = urlOriginal.split('?')[0];
             finalUrl = `${urlBase}?tag=${AMAZON_ID}`;
         } 
         else if (urlOriginal.includes("shopee.com.br")) {
-            // Estrutura básica para redirecionamento Shopee
-            finalUrl = `https://shope.ee/universal-link/custom?url=${encodeURIComponent(urlOriginal)}&utm_campaign=${SHOPEE_ID}`;
+            // Novo formato de link de afiliado da Shopee para redirecionamento direto
+            // Substituímos o redirecionamento universal por um link de rastreio customizado
+            const urlLimpa = urlOriginal.split('?')[0];
+            finalUrl = `https://shope.ee/api/v2/affiliate/custom_link?link=${encodeURIComponent(urlLimpa)}&sub_id=${SHOPEE_ID}`;
+            
+            // Alternativa caso o de cima não funcione no seu painel:
+            // finalUrl = `https://shopee.com.br/universal-link/product/${urlLimpa}?utm_campaign=${SHOPEE_ID}&utm_content=appworker`;
         }
-        else if (urlOriginal.includes("mercadolivre.com.br") || urlOriginal.includes("mlstatic.com")) {
-            // No Mercado Livre, o ideal é usar o encurtador do painel, 
-            // mas aqui vamos apenas simular a organização por enquanto.
+        else if (urlOriginal.includes("mercadolivre.com.br")) {
+            // No Mercado Livre (Meli), o link de afiliado geralmente contém '/social/' ou é um link curto 'mercadolivre.com/sec/'
             finalUrl = urlOriginal; 
-            alert("Atenção: Para o Mercado Livre, use o encurtador oficial no painel de afiliados para garantir a comissão!");
+            alert("Mercado Livre: Certifique-se de que este é o link gerado no botão 'Compartilhar' do app do Meli!");
         } else {
-            alert("Site não reconhecido. Cole um link da Amazon, Shopee ou Mercado Livre.");
+            alert("Site não reconhecido.");
             return;
         }
 
