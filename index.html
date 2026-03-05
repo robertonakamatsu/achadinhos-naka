@@ -3,101 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AppWorker - Gerador de Ofertas</title>
+    <title>AppWorker Pro</title>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         :root { --primary: #1a73e8; --accent: #34a853; --bg: #f8f9fa; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .container { background: white; padding: 30px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); width: 100%; max-width: 480px; box-sizing: border-box; text-align: center; }
-        h1 { color: var(--primary); font-size: 28px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .subtitle { color: #666; margin-bottom: 25px; font-size: 14px; }
-        input { width: 100%; padding: 18px; border: 2px solid #edf0f2; border-radius: 16px; box-sizing: border-box; font-size: 16px; outline: none; transition: 0.3s; background: #fdfdfd; margin-bottom: 15px; }
-        input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1); }
-        button { width: 100%; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 16px; font-size: 17px; font-weight: 600; cursor: pointer; transition: 0.3s; }
-        button:active { transform: scale(0.98); }
-        .loader { display: none; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); width: 100%; max-width: 450px; text-align: center; }
+        input { width: 100%; padding: 15px; border: 2px solid #edf0f2; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        
+        /* Estilo do Story para o Download */
+        #storyArea { display: none; margin-top: 20px; padding: 20px; background: white; border: 1px solid #eee; border-radius: 15px; position: relative; }
+        .img-box { background: #fff; padding: 10px; border: 1px solid #f0f0f0; border-radius: 12px; margin-bottom: 15px; }
+        #prodImg { max-width: 100%; height: 250px; object-fit: contain; }
+        #prodTitle { font-size: 16px; font-weight: 700; color: #333; margin: 10px 0; }
+        #prodPrice { color: var(--accent); font-size: 24px; font-weight: 900; }
+        
+        .loader { display: none; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 15px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #previewArea { display: none; margin-top: 30px; padding: 20px; border-radius: 20px; border: 1px solid #eee; background: #fff; }
-        .img-container { background: #fff; border-radius: 15px; padding: 10px; margin-bottom: 15px; border: 1px solid #f0f0f0; min-height: 250px; display: flex; align-items: center; justify-content: center; }
-        #prodImg { max-width: 100%; max-height: 300px; border-radius: 8px; object-fit: contain; }
-        #prodTitle { font-size: 18px; font-weight: 700; color: #333; margin: 10px 0; }
-        #prodPrice { color: var(--accent); font-size: 26px; font-weight: 900; margin: 10px 0; }
-        .btn-download { background: var(--accent); margin-top: 20px; }
+        .btn-save { background: var(--accent); margin-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>🚀 AppWorker</h1>
-    <p class="subtitle">Cole seu link de afiliado da <strong>Amazon, Shopee ou Meli</strong></p>
-    
-    <input type="text" id="linkInput" placeholder="Cole o link aqui..." onpaste="setTimeout(processarLink, 100)">
-    <button id="btnManual" onclick="processarLink()">Capturar Dados</button>
-
+    <input type="text" id="linkInput" placeholder="Cole o link de afiliado aqui...">
+    <button onclick="processar()">Gerar Story</button>
     <div id="loader" class="loader"></div>
 
-    <div id="previewArea">
-        <div class="img-container">
-            <img id="prodImg" src="" alt="Produto">
+    <div id="storyArea">
+        <div id="captureArea" style="padding: 10px; background: white;">
+            <div class="img-box">
+                <img id="prodImg" crossorigin="anonymous" src="" alt="Produto">
+            </div>
+            <h3 id="prodTitle">Título do Produto</h3>
+            <p id="prodPrice">Confira no Link!</p>
+            <p style="font-size: 10px; color: #999;">appworker.com.br</p>
         </div>
-        <h3 id="prodTitle">Título do Produto</h3>
-        <p id="prodPrice">🔥 Confira no Link!</p>
-        <button class="btn-download" onclick="alert('Funcionalidade em desenvolvimento!')">Baixar Arte para Story</button>
+        <button class="btn-save" onclick="baixar()">Baixar Imagem</button>
     </div>
 </div>
 
 <script>
-    async function processarLink() {
+    async function processar() {
         const url = document.getElementById('linkInput').value;
         if (!url) return;
-
-        const loader = document.getElementById('loader');
-        const preview = document.getElementById('previewArea');
-        const btn = document.getElementById('btnManual');
-        
-        loader.style.display = 'block';
-        btn.style.display = 'none';
-        preview.style.display = 'none';
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('storyArea').style.display = 'none';
 
         try {
-            // Usando Microlink para extrair dados brutos
-            const response = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
-            const result = await response.json();
-
-            if (result.status === 'success') {
-                const data = result.data;
+            const res = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
+            const json = await res.json();
+            if (json.status === 'success') {
+                const d = json.data;
+                document.getElementById('prodTitle').innerText = d.title;
                 
-                // 1. Título
-                document.getElementById('prodTitle').innerText = data.title || "Oferta Especial";
-
-                // 2. Lógica Inteligente de Imagem
-                let rawImg = data.image?.url || data.logo?.url || "";
+                // Forçamos o carregamento da imagem via proxy para evitar o bloqueio de CORS visto nas imagens anteriores
+                let imgUrl = d.image?.url || d.logo?.url;
+                document.getElementById('prodImg').src = `https://images.weserv.nl/?url=${encodeURIComponent(imgUrl)}&w=500`;
                 
-                // Se o link for do Mercado Livre e a imagem contiver "logo", tentamos outra fonte
-                if (url.includes('mercadolivre') && rawImg.toLowerCase().includes('logo')) {
-                    rawImg = data.screenshot?.url || rawImg; 
-                }
-
-                if (rawImg) {
-                    // Aplicamos o proxy weserv.nl para forçar o carregamento e evitar bloqueio de CORS
-                    document.getElementById('prodImg').src = `https://images.weserv.nl/?url=${encodeURIComponent(rawImg)}&w=600&fit=contain`;
-                }
-
-                // 3. Tenta buscar preço
-                const priceMatch = data.description?.match(/R\$\s?(\d+,\d{2})/);
-                document.getElementById('prodPrice').innerText = priceMatch ? priceMatch[0] : "🔥 Confira no Link!";
-                
-                preview.style.display = 'block';
-            } else {
-                alert("Não foi possível ler os dados. O link é de um produto?");
+                document.getElementById('storyArea').style.display = 'block';
             }
-        } catch (error) {
-            alert("Erro de conexão. Tente novamente.");
-        } finally {
-            loader.style.display = 'none';
-            btn.style.display = 'block';
-        }
+        } catch (e) { alert("Erro ao capturar dados."); }
+        finally { document.getElementById('loader').style.display = 'none'; }
+    }
+
+    function baixar() {
+        const area = document.getElementById('captureArea');
+        html2canvas(area, { useCORS: true, logging: false }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'story-oferta.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
     }
 </script>
-
 </body>
 </html>
