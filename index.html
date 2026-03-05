@@ -1,78 +1,42 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AppWorker - Gerador de Ofertas</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
-        h1 { color: #1a73e8; font-size: 22px; text-align: center; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #444; }
-        input, select { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 15px; background: #1a73e8; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #1557b0; }
-        #resultado { margin-top: 20px; padding: 15px; background: #e8f0fe; border-radius: 8px; word-break: break-all; display: none; }
-        .copy-btn { background: #34a853; margin-top: 10px; font-size: 14px; padding: 10px; }
-    </style>
-</head>
-<body>
-
 <div class="container">
     <h1>🚀 AppWorker Ofertas</h1>
     
-    <label for="linkOriginal">Link do Produto (Amazon, Shopee, Meli):</label>
-    <input type="text" id="linkOriginal" placeholder="Cole o link aqui...">
+    <label>Cole seu Link de Afiliado (já gerado):</label>
+    <input type="text" id="linkAfiliado" placeholder="https://shope.ee/... ou https://mercadolivre.com/...">
 
-    <button onclick="gerarLink()">Gerar Link de Afiliado</button>
+    <button onclick="puxarDados()">Puxar Dados da Oferta</button>
 
-    <div id="resultado">
-        <label>Seu Link de Afiliado:</label>
-        <span id="linkGerado"></span>
-        <button class="copy-btn" onclick="copiarLink()">Copiar Link</button>
+    <div id="previewArea" style="display:none; margin-top:20px; text-align:center;">
+        <h3 id="prodTitle" style="font-size:16px;"></h3>
+        <img id="prodImg" src="" style="width:200px; border-radius:10px; margin:10px 0;">
+        <p id="prodPrice" style="font-weight:bold; color:green; font-size:20px;"></p>
+        
+        <button onclick="baixarImagem()" style="background:#ff5722;">Baixar Imagem para Story</button>
     </div>
 </div>
 
 <script>
-    const AMAZON_ID = 'achadin01d906-20';
-    const SHOPEE_ID = '18362810481';
+    async function puxarDados() {
+        const url = document.getElementById('linkAfiliado').value;
+        if(!url) return alert("Cole o link primeiro!");
 
-function gerarLink() {
-        const urlOriginal = document.getElementById('linkOriginal').value;
-        let finalUrl = "";
+        // Usaremos um serviço gratuito de extração de meta-tags (OpenGraph)
+        // Isso evita que o seu servidor seja bloqueado pela Shopee
+        const api = `https://api.microlink.io?url=${encodeURIComponent(url)}`;
 
-        if (urlOriginal.includes("amazon.com.br")) {
-            const urlBase = urlOriginal.split('?')[0];
-            finalUrl = `${urlBase}?tag=${AMAZON_ID}`;
-        } 
-        else if (urlOriginal.includes("shopee.com.br")) {
-            // Novo formato de link de afiliado da Shopee para redirecionamento direto
-            // Substituímos o redirecionamento universal por um link de rastreio customizado
-            const urlLimpa = urlOriginal.split('?')[0];
-            finalUrl = `https://shope.ee/api/v2/affiliate/custom_link?link=${encodeURIComponent(urlLimpa)}&sub_id=${SHOPEE_ID}`;
+        try {
+            const response = await fetch(api);
+            const data = await response.json();
             
-            // Alternativa caso o de cima não funcione no seu painel:
-            // finalUrl = `https://shopee.com.br/universal-link/product/${urlLimpa}?utm_campaign=${SHOPEE_ID}&utm_content=appworker`;
+            if(data.status === 'success') {
+                const info = data.data;
+                document.getElementById('prodTitle').innerText = info.title || "Produto sem título";
+                document.getElementById('prodImg').src = info.image?.url || "";
+                document.getElementById('prodPrice').innerText = "Confira o preço no link!"; 
+                document.getElementById('previewArea').style.display = 'block';
+            }
+        } catch (e) {
+            alert("Erro ao buscar dados. Tente novamente ou insira manualmente.");
         }
-        else if (urlOriginal.includes("mercadolivre.com.br")) {
-            // No Mercado Livre (Meli), o link de afiliado geralmente contém '/social/' ou é um link curto 'mercadolivre.com/sec/'
-            finalUrl = urlOriginal; 
-            alert("Mercado Livre: Certifique-se de que este é o link gerado no botão 'Compartilhar' do app do Meli!");
-        } else {
-            alert("Site não reconhecido.");
-            return;
-        }
-
-        document.getElementById('linkGerado').innerText = finalUrl;
-        document.getElementById('resultado').style.display = 'block';
-    }
-
-    function copiarLink() {
-        const texto = document.getElementById('linkGerado').innerText;
-        navigator.clipboard.writeText(texto);
-        alert("Link copiado para a área de transferência!");
     }
 </script>
-
-</body>
-</html>
